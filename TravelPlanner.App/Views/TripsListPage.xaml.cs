@@ -13,10 +13,10 @@ public partial class TripsListPage : ContentPage
         _viewModel = viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        // Using Task.Run to avoid blocking the UI thread
-        Task.Run(() => _viewModel.LoadTripsCommand.Execute(null));
+        // This is a much safer way to load data on page appearance
+        await _viewModel.LoadTripsAsync();
     }
 }
