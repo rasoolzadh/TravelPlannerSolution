@@ -6,6 +6,14 @@
              x:DataType="viewmodels:MapViewModel"
              Title="{Binding Title}">
 
-    <WebView x:Name="mapWebView" />
+    <Grid>
+        <WebView x:Name="mapWebView" IsVisible="{Binding IsNotBusy}" />
+
+        <ActivityIndicator IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           Color="{StaticResource Primary}"/>
+    </Grid>
 
 </ContentPage>

@@ -16,7 +16,8 @@ public partial class MapPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        var url = await _viewModel.GetMapUrlAsync();
-        mapWebView.Source = new UrlWebViewSource { Url = url };
+        // Generate the HTML and load it into the WebView
+        var htmlSource = await _viewModel.GenerateMapHtmlAsync();
+        mapWebView.Source = new HtmlWebViewSource { Html = htmlSource };
     }
 }

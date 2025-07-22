@@ -21,17 +21,13 @@ namespace TravelPlanner.App.ViewModels
             Title = "Trip Map";
         }
 
-        // This is the geocoding method you created
         private async Task<(double? Latitude, double? Longitude)> TryGeocodeWithNominatim(string placeName)
         {
             try
             {
-                // Use a static HttpClient to be more efficient
                 using var httpClient = new HttpClient();
                 var url = $"https://nominatim.openstreetmap.org/search?q={Uri.EscapeDataString(placeName)}&format=json&limit=1";
-
-                // Nominatim requires a unique User-Agent header
-                httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("TravelPlannerApp/1.0 (your-email@example.com)");
+                httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("TravelPlannerApp/1.0");
 
                 var response = await httpClient.GetStringAsync(url);
                 var results = JsonSerializer.Deserialize<List<NominatimResult>>(response);
@@ -49,45 +45,101 @@ namespace TravelPlanner.App.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"Nominatim geocoding failed for '{placeName}': {ex.Message}");
             }
-
             return (null, null);
         }
 
-        // This method is now updated to generate a route with all stops
-        public async Task<string> GetMapUrlAsync()
+        public async Task<string> GenerateMapHtmlAsync()
         {
-            if (trip == null || !trip.Stops.Any())
+            IsBusy = true;
+            try
             {
-                await Shell.Current.DisplayAlert("No Stops", "This trip has no stops to display.", "OK");
-                return "about:blank";
-            }
-
-            var coordinates = new List<string>();
-
-            // Loop through all stops, not just the first one
-            foreach (var stop in trip.Stops.OrderBy(s => s.ArrivalDate))
-            {
-                var (lat, lon) = await TryGeocodeWithNominatim(stop.Location);
-                if (lat.HasValue && lon.HasValue)
+                if (trip == null || !trip.Stops.Any())
                 {
-                    // Format as lat,lon
-                    var latStr = lat.Value.ToString(CultureInfo.InvariantCulture);
-                    var lonStr = lon.Value.ToString(CultureInfo.InvariantCulture);
-                    coordinates.Add($"{latStr},{lonStr}");
+                    return GetErrorHtml("This trip has no stops to display.");
                 }
-            }
 
-            if (coordinates.Count < 2)
+                var coordinates = new StringBuilder();
+                var locationsFound = 0;
+
+                foreach (var stop in trip.Stops.OrderBy(s => s.ArrivalDate))
+                {
+                    var (lat, lon) = await TryGeocodeWithNominatim(stop.Location);
+                    if (lat.HasValue && lon.HasValue)
+                    {
+                        var latStr = lat.Value.ToString(CultureInfo.InvariantCulture);
+                        var lonStr = lon.Value.ToString(CultureInfo.InvariantCulture);
+                        var title = stop.Location.Replace("'", "\\'");
+
+                        coordinates.Append($"[{latStr}, {lonStr}, '{title}'],");
+                        locationsFound++;
+                    }
+                }
+
+                if (locationsFound == 0)
+                {
+                    return GetErrorHtml("Could not find coordinates for any stops in this trip.");
+                }
+
+                return GetMapHtml(coordinates.ToString());
+            }
+            finally
             {
-                await Shell.Current.DisplayAlert("Not Enough Locations", "Could not find coordinates for enough stops to create a route.", "OK");
-                return "about:blank";
+                IsBusy = false;
             }
+        }
 
-            // Join the coordinates with a semicolon for the URL
-            var routeCoordinates = string.Join(";", coordinates);
+        private string GetMapHtml(string coordinatesJsArray)
+        {
+            return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trip Stops</title>
+    <meta charset=""utf-8"" />
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <link rel=""stylesheet"" href=""https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"" />
+    <script src=""https://unpkg.com/leaflet@1.9.4/dist/leaflet.js""></script>
+    <style>
+        html, body, #map {{ height: 100%; width: 100%; margin: 0; padding: 0; }}
+    </style>
+</head>
+<body>
+    <div id=""map""></div>
+    <script>
+        var map = L.map('map');
+        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
+            attribution: '&copy; <a href=""https://www.openstreetmap.org/copyright"">OpenStreetMap</a> contributors'
+        }}).addTo(map);
 
-            // Construct the OpenStreetMap directions URL
-            return $"https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route={routeCoordinates}";
+        var points = [{coordinatesJsArray}];
+        var markers = [];
+
+        for (var i = 0; i < points.length; i++) {{
+            var marker = L.marker([points[i][0], points[i][1]]).addTo(map)
+                .bindPopup(points[i][2]);
+            markers.push(marker);
+        }}
+
+        if (markers.length > 0) {{
+            var group = L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.5));
+        }}
+    </script>
+</body>
+</html>";
+        }
+
+        private string GetErrorHtml(string message)
+        {
+            return $@"
+<!DOCTYPE html>
+<html>
+<head><title>Error</title></head>
+<body style='font-family: sans-serif; text-align: center; padding-top: 20px;'>
+    <h2>Map Not Available</h2>
+    <p>{message}</p>
+</body>
+</html>";
         }
     }
 }
