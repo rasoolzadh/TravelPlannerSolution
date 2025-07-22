@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="TravelPlanner.App.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:TravelPlanner.App.Views"
+    Shell.FlyoutBehavior="Disabled">
+
+    <ShellContent
+        Title="My Trips"
+        ContentTemplate="{DataTemplate local:TripsListPage}"
+        Route="MainPage" />
+
+</Shell>

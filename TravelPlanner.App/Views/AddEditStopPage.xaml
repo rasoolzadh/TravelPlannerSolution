@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:TravelPlanner.App.ViewModels"
+             x:Class="TravelPlanner.App.Views.AddEditStopPage"
+             x:DataType="viewmodels:AddEditStopViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="10" Padding="20">
+            <Label Text="Location"/>
+            <Entry Text="{Binding Stop.Location}" Placeholder="e.g., Rome, Italy"/>
+
+            <Label Text="Arrival Date"/>
+            <DatePicker Date="{Binding Stop.ArrivalDate}" />
+
+            <Label Text="Departure Date"/>
+            <DatePicker Date="{Binding Stop.DepartureDate}" />
+
+            <Label Text="Estimated Cost ($)"/>
+            <Entry Text="{Binding Stop.EstimatedCost}" Keyboard="Numeric" Placeholder="e.g., 500" />
+
+            <Label Text="Notes"/>
+            <Editor Text="{Binding Stop.Notes}" Placeholder="Booking references, ideas..." HeightRequest="120" />
+
+            <Button Text="Save Stop" Command="{Binding SaveStopCommand}" Margin="0,20,0,0"/>
+            <ActivityIndicator IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

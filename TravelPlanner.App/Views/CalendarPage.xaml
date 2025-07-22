@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:TravelPlanner.App.ViewModels"
+             xmlns:models="clr-namespace:TravelPlanner.App.Models"
+             x:Class="TravelPlanner.App.Views.CalendarPage"
+             x:DataType="viewmodels:CalendarViewModel"
+             Title="{Binding Title}">
+
+    <Grid RowDefinitions="Auto, *">
+        <VerticalStackLayout Grid.Row="0" Padding="10" Spacing="5">
+            <Label Text="Select a Date:" FontAttributes="Bold" />
+            <DatePicker Date="{Binding SelectedDate}"
+                        MinimumDate="{Binding Trip.StartDate}"
+                        MaximumDate="{Binding Trip.EndDate}" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Grid.Row="1" Padding="10">
+            <Label Text="Stops on this day:" FontAttributes="Bold" FontSize="18"/>
+            <CollectionView ItemsSource="{Binding StopsForSelectedDate}">
+                <CollectionView.EmptyView>
+                    <Label Text="No stops scheduled for the selected date." Margin="10" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Stop">
+                        <Frame Padding="10" Margin="5" BorderColor="LightGray">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding Location}" FontAttributes="Bold" />
+                                <Label Text="{Binding ArrivalDate, StringFormat='Arrives: {0:t}'}" />
+                                <Label Text="{Binding Notes}" TextColor="Gray"/>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

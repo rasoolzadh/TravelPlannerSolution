@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:TravelPlanner.App.ViewModels"
+             x:Class="TravelPlanner.App.Views.AddEditTripPage"
+             x:DataType="viewmodels:AddEditTripViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="#F0F0F0">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="20">
+
+            <Label Text="Trip Title" FontAttributes="Bold"/>
+            <Border Stroke="#CCCCCC" StrokeThickness="1" Padding="8,0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8"/>
+                </Border.StrokeShape>
+                <!-- Removed BorderColor property from Entry as it is not valid -->
+                <Entry Text="{Binding Trip.Title}" Placeholder="e.g., Summer in Italy"/>
+            </Border>
+
+            <Label Text="Description" FontAttributes="Bold"/>
+            <Border Stroke="#CCCCCC" StrokeThickness="1" Padding="8">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8"/>
+                </Border.StrokeShape>
+                <!-- Removed BorderColor property from Editor as it is not valid -->
+                <Editor Text="{Binding Trip.Description}" Placeholder="Details about your adventure" HeightRequest="100" AutoSize="Disabled"/>
+            </Border>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="Start Date" FontAttributes="Bold"/>
+                    <Border Stroke="#CCCCCC" StrokeThickness="1">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <DatePicker Date="{Binding Trip.StartDate}" Margin="10,5"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1">
+                    <Label Text="End Date" FontAttributes="Bold"/>
+                    <Border Stroke="#CCCCCC" StrokeThickness="1">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <DatePicker Date="{Binding Trip.EndDate}" Margin="10,5"/>
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+
+            <Label Text="Budget ($)" FontAttributes="Bold"/>
+            <Border Stroke="#CCCCCC" StrokeThickness="1" Padding="8,0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8"/>
+                </Border.StrokeShape>
+                <!-- Removed BorderColor property from Entry as it is not valid -->
+                <Entry Text="{Binding Trip.Budget}" Keyboard="Numeric" Placeholder="e.g., 2000"/>
+            </Border>
+
+            <Button Text="Save Trip" 
+                    Command="{Binding SaveTripCommand}" 
+                    Margin="0,20,0,0"
+                    BackgroundColor="#512BD4"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    HeightRequest="50"
+                    CornerRadius="8"/>
+
+            <ActivityIndicator IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
